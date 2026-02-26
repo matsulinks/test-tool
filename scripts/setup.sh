@@ -130,6 +130,26 @@ fi
 echo ""
 
 # -------------------------------------------------------
+# Step 3.6: xAI API の設定（デッドロック時の質問状自動送信）
+# -------------------------------------------------------
+echo "🧠 [3.6/4] デッドロック時の xAI (Grok) API連携を設定します（スキップ可）"
+echo ""
+echo "  xAI APIキーを入力すると、デッドロック時に自動でGrokへ質問を投げ、回答ファイルを作成します。"
+echo -n "  xAI API キー（スキップ→Enter）: "
+read -s XAI_API_KEY
+echo ""
+
+# .env に追記
+if [ -n "$XAI_API_KEY" ]; then
+    grep -v "XAI_API_KEY" .env > /tmp/env_tmp && mv /tmp/env_tmp .env || true
+    echo "XAI_API_KEY=$XAI_API_KEY" >> .env
+    echo -e "${GREEN}✅ xAI API連携を設定しました${RESET}"
+else
+    echo "  （xAI API連携なし。後で setup.sh を再実行すれば追加できます）"
+fi
+echo ""
+
+# -------------------------------------------------------
 # Step 4: GitHub への接続確認
 # -------------------------------------------------------
 echo "🌐 [4/4] GitHubへの接続を確認中..."
