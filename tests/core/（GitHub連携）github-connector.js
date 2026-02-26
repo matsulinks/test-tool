@@ -10,8 +10,8 @@ require('dotenv').config({ path: path.join(__dirname, '../../.env') }); // ル�
 // 設定（テスト対象のリポジトリ情報）
 // -------------------------------------------------------
 const GITHUB_TOKEN = process.env.ATP_GITHUB_TOKEN;
-const REPO_OWNER = 'matsulinks';
-const REPO_NAME = 'vault-alchemist';
+const REPO_OWNER = process.env.ATP_REPO_OWNER ?? 'matsulinks';       // .envで上書き可能
+const REPO_NAME = process.env.ATP_REPO_NAME ?? 'vault-alchemist';  // .envで上書き可能
 
 // GitHub Issueのラベル定義
 const LABELS = {

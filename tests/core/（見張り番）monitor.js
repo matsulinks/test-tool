@@ -17,7 +17,7 @@ async function runPilotTest() {
     try {
         // 1. サンドボックスでテスト実行
         // ガイドに基づき、まずはサービス側のテストを実行してみる
-        const output = execSync('npm run test -w service', { cwd: SANDBOX_DIR, encoding: 'utf-8' });
+        const output = execSync('npm run test -w service', { cwd: SANDBOX_DIR, encoding: 'utf-8', timeout: 300000 }); // 5分でタイムアウト
 
         console.log('🟢 ATP: 全テストがパスしました！聖域は守られています。');
 
