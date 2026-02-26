@@ -1,5 +1,12 @@
-# @docs/派生プロジェクト/（設計図）ai-growth-record.md
-# AI育成記録システム / AI Growth Record System
+# ~~AI育成記録システム / AI Growth Record System~~
+
+> ⚠️ **この仕様書は Alchemist Pilot (AP) v3.0 に統合されました。**
+> 正式な底本: `docs/（設計図）spec.md` — セクション 4.9「成長記憶（Growth Memory）」
+> このファイルは融合の記録として保存します（削除しません）。
+
+---
+
+
 
 ## 0. 出自 / Origin
 
