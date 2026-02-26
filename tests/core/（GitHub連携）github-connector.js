@@ -3,7 +3,8 @@
 // 開発AIがIssueをCloseするのを監視して再テストを起動するパイプライン
 
 const https = require('https');
-require('dotenv').config(); // .env から ATP_GITHUB_TOKEN を読み込む
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../../.env') }); // ルートの.envを読む
 
 // -------------------------------------------------------
 // 設定（テスト対象のリポジトリ情報）
@@ -73,7 +74,9 @@ ${reportSummary}
 
 1. 上記の失敗項目を修正してください
 2. 修正完了後、\`tests/registry/latest_report.md\` を**削除**してください
-3. このIssueを**Close**してください → ATPが再テストを開始します
+3. このIssueを**GitHub上で直接Close（またはgh CLI等で手動Close）**してください。
+   ⚠️ 注意: 作業ブランチからのPushの場合、コミットメッセージによる自動Close（\`Closes #XXX\`）は発動しません。必ず手動でCloseしてください。
+   （IssueのCloseを検知した時点で、ATPが再テストを開始します）
 
 > このIssueはATPが自動生成しました。`;
 

@@ -1,6 +1,7 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const { postFailureIssue } = require('./（GitHub連携）github-connector.js');
 
 // 構成設定
 const SANDBOX_DIR = '/tmp/atp_sandbox';
@@ -10,7 +11,7 @@ const REPORT_PATH = path.join(REGISTRY_DIR, 'latest_report.md');
 /**
  * テストを実行し、結果を報告書にまとめる
  */
-function runPilotTest() {
+async function runPilotTest() {
     console.log('🛰️  ATP: 抜き打ちテストを開始します...');
 
     try {
@@ -55,6 +56,9 @@ ${errorOutput}
 
         fs.writeFileSync(REPORT_PATH, reportContent.trim());
         console.log(`📄 ATP: 報告書を生成しました: ${REPORT_PATH}`);
+
+        // 3. GitHubへIssue投稿（自動直結）
+        await postFailureIssue(reportContent.trim());
     }
 }
 

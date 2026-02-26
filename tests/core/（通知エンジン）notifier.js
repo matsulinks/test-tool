@@ -4,7 +4,8 @@
 
 const https = require('https');
 const url = require('url');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
 // .env から読み込む
 const DISCORD_WEBHOOK = process.env.ATP_DISCORD_WEBHOOK; // Discord Webhook URL
