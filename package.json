@@ -1,0 +1,20 @@
+{
+    "name": "alchemist-test-pilot",
+    "version": "0.1.0",
+    "description": "ATP — Obsidianプラグインの自動テストツール",
+    "private": true,
+    "scripts": {
+        "test:cli": "node 'tests/core/（見張り番）monitor.js'",
+        "test:ui": "playwright test tests/ui/",
+        "test:all": "npm run test:cli && npm run test:ui",
+        "setup": "bash scripts/setup.sh"
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.41.0",
+        "js-yaml": "^4.1.0",
+        "playwright-core": "^1.41.0"
+    },
+    "dependencies": {
+        "dotenv": "^17.3.1"
+    }
+}

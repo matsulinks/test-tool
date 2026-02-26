@@ -1,0 +1,231 @@
+# =============================================================
+# ATP テスト定義ファイル - Vault Alchemist (Obsidian プラグイン)
+# このファイルは (サンプル)obsidianのSETUP.ja.md を元に生成した
+# 「ATPが読み込むテストのレシピ」である。
+# =============================================================
+
+project:
+  name: "vault-alchemist"
+  repo: "https://github.com/matsulinks/vault-alchemist"
+  branch: "claude/review-project-design-f0ZNu"
+  sandbox_dir: "/tmp/atp_sandbox"
+  service_port: 3000
+
+# =============================================================
+# フェーズ1: CLIテスト（53項目）
+# npm run test -w service を実行し、全グループのパスを確認する
+# =============================================================
+phase_1_cli:
+  command: "npm run test -w service"
+  expected_total: 53
+  description: "コードの内部ロジック（計算・解析・DB保存）をまとめて確認するテスト群"
+
+  groups:
+    - id: "G1"
+      name: "類似度計算"
+      file: "src/pipeline/similarity.test.ts"
+      count: 6
+      sanctuary: true  # 聖域指定: 一度でも壊れたら即アラート
+      items:
+        - { no: 1, desc: "まったく同じベクトルを比べると類似度1.0になるか", expected: "1.0" }
+        - { no: 2, desc: "まったく違うベクトルを比べると類似度が低くなるか", expected: "0.0〜0.5" }
+        - { no: 3, desc: "空のベクトルを渡しても壊れないか", expected: "0.0" }
+        - { no: 4, desc: "負の値を含むベクトルを正しく計算できるか", expected: "正しい値" }
+        - { no: 5, desc: "長さが違うベクトルを渡したときにエラーになるか", expected: "エラー" }
+        - { no: 6, desc: "大量のベクトルを高速に処理できるか", expected: "完了" }
+
+    - id: "G2"
+      name: "チャットログの解析"
+      file: "src/pipeline/chat-parser.test.ts"
+      count: 7
+      sanctuary: true
+      items:
+        - { no: 1, desc: "通常の会話ログが正しくパースされるか", expected: "メッセージ配列" }
+        - { no: 2, desc: "話者名（User/AI）が正しく認識されるか", expected: "各メッセージに話者付き" }
+        - { no: 3, desc: "タイムスタンプが含まれる場合に解析されるか", expected: "日時が抽出される" }
+        - { no: 4, desc: "空のファイルを渡しても壊れないか", expected: "空配列" }
+        - { no: 5, desc: "長い会話ログでも動くか", expected: "全メッセージが取れる" }
+        - { no: 6, desc: "特殊文字（日本語・絵文字）が含まれても壊れないか", expected: "文字化けしない" }
+        - { no: 7, desc: "対応していない形式のファイルでもエラーにならないか", expected: "空配列またはエラー" }
+
+    - id: "G3"
+      name: "話題の境界検出"
+      file: "src/pipeline/boundary-detector.test.ts"
+      count: 8
+      sanctuary: true
+      items:
+        - { no: 1, desc: "1つの話題しかない会話では境界が出ないか", expected: "境界なし" }
+        - { no: 2, desc: "明らかに話題が変わっている箇所を検出できるか", expected: "正しいインデックス" }
+        - { no: 3, desc: "急に違う言語に切り替わったとき境界になるか", expected: "境界あり" }
+        - { no: 4, desc: "短すぎる会話でも壊れないか", expected: "境界なし" }
+        - { no: 5, desc: "しきい値（sensitivity）を変えると境界数が変わるか", expected: "比例して変わる" }
+        - { no: 6, desc: "会話が1メッセージだけでも壊れないか", expected: "境界なし" }
+        - { no: 7, desc: "境界の位置が正しいインデックスを返すか", expected: "正しいインデックス" }
+        - { no: 8, desc: "全体の話題を要約した名前が付くか", expected: "文字列が返る" }
+
+    - id: "G4"
+      name: "スレッド分割"
+      file: "src/pipeline/thread-builder.test.ts"
+      count: 6
+      sanctuary: true
+      items:
+        - { no: 1, desc: "会話が正しくスレッドに分かれるか", expected: "スレッド配列" }
+        - { no: 2, desc: "各スレッドにメッセージが正しく含まれるか", expected: "messages付き" }
+        - { no: 3, desc: "スレッドが1つのとき（分割なし）でも動くか", expected: "1スレッド" }
+        - { no: 4, desc: "境界が連続しているとき（空のスレッドが出ないか）", expected: "スキップされる" }
+        - { no: 5, desc: "各スレッドのメタデータ（開始・終了位置）が正しいか", expected: "正しいインデックス" }
+        - { no: 6, desc: "大量のスレッドでも動くか", expected: "全スレッドが取れる" }
+
+    - id: "G5"
+      name: "テキストのチャンク分割"
+      file: "src/pipeline/chunker.test.ts"
+      count: 7
+      sanctuary: true
+      items:
+        - { no: 1, desc: "長いテキストが正しいサイズに分割されるか", expected: "適切なサイズのチャンク" }
+        - { no: 2, desc: "最大トークン数を超えないか", expected: "各チャンクがサイズ以内" }
+        - { no: 3, desc: "チャンクに重複（オーバーラップ）があるか", expected: "指定分の重複あり" }
+        - { no: 4, desc: "空のテキストを渡しても壊れないか", expected: "空配列" }
+        - { no: 5, desc: "短いテキストが1チャンクになるか", expected: "1チャンク" }
+        - { no: 6, desc: "各チャンクにIDとハッシュが付いているか", expected: "chunkId, hash付き" }
+        - { no: 7, desc: "同じテキストのハッシュは毎回同じになるか", expected: "同一ハッシュ" }
+
+    - id: "G6"
+      name: "処理量の見積もり"
+      file: "src/pipeline/estimator.test.ts"
+      count: 6
+      sanctuary: true
+      items:
+        - { no: 1, desc: "通常のMarkdownファイルの見積もりができるか", expected: "tokenCount, costUsd" }
+        - { no: 2, desc: "ファイルが存在しない場合にエラーになるか", expected: "エラー" }
+        - { no: 3, desc: "空ファイルの見積もりがゼロになるか", expected: "0" }
+        - { no: 4, desc: "日本語テキストのトークン数が正しく計算されるか", expected: "適切な数値" }
+        - { no: 5, desc: "大きなファイルでも動くか", expected: "大きな数値" }
+        - { no: 6, desc: "Frontmatter（---から始まるメタデータ）が含まれていても正しいか", expected: "frontmatterを含む数値" }
+
+    - id: "G7"
+      name: "ジョブログのDB保存"
+      file: "src/pipeline/job-store.test.ts"
+      count: 8
+      sanctuary: true
+      items:
+        - { no: 1, desc: "ジョブを保存できるか", expected: "保存成功" }
+        - { no: 2, desc: "保存したジョブを取り出せるか", expected: "同じデータが返る" }
+        - { no: 3, desc: "run_idで絞り込みができるか", expected: "対象のみ返る" }
+        - { no: 4, desc: "存在しないrun_idで空配列が返るか", expected: "[]" }
+        - { no: 5, desc: "複数のジョブを保存して全件取得できるか", expected: "全件" }
+        - { no: 6, desc: "ジョブのステータスを更新できるか", expected: "更新された値" }
+        - { no: 7, desc: "DBが壊れていてもアプリが落ちないか", expected: "エラーハンドリング" }
+        - { no: 8, desc: "Vaultパスが変わっても別DBとして扱われるか", expected: "分離される" }
+
+    - id: "G8"
+      name: "埋め込みのDB保存"
+      file: "src/pipeline/embedding-store.test.ts"
+      count: 5
+      sanctuary: true
+      items:
+        - { no: 1, desc: "チャンクのベクトルを保存できるか", expected: "保存成功" }
+        - { no: 2, desc: "保存したベクトルを取り出せるか", expected: "同じベクトル" }
+        - { no: 3, desc: "同じハッシュがあるかチェックできるか", expected: "true/false" }
+        - { no: 4, desc: "全件取得ができるか", expected: "全埋め込み" }
+        - { no: 5, desc: "同じchunkIdを上書き保存（upsert）できるか", expected: "最新値になる" }
+
+# =============================================================
+# フェーズ2: APIテスト（サービス起動後にHTTPリクエストで確認）
+# =============================================================
+phase_2_api:
+  service_start_command: "node service/dist/main.js"
+  service_ready_message: "service started on port"
+  base_url: "http://127.0.0.1:3000"
+  description: "バックエンドサービスへのHTTPリクエストで、APIの入出力を確認するテスト群"
+
+  tests:
+    - id: "A1"
+      name: "ヘルスチェック"
+      method: "GET"
+      path: "/health"
+      headers: {}
+      body: null
+      expected_status: 200
+      expected_body_contains:
+        - '"status":"ok"'
+
+    - id: "A2"
+      name: "ノートの処理量見積もり（正常ケース）"
+      method: "POST"
+      path: "/estimate"
+      headers:
+        Content-Type: "application/json"
+        x-vault-path: "{{SANDBOX_DIR}}"
+      body: '{"notePath": "examples/sample-chat.md"}'
+      expected_status: 200
+      expected_body_contains:
+        - '"tokenCount"'
+        - '"costUsd"'
+
+    - id: "A3"
+      name: "ジョブ履歴の取得（初期状態は空）"
+      method: "GET"
+      path: "/jobs"
+      headers:
+        x-vault-path: "{{SANDBOX_DIR}}"
+      body: null
+      expected_status: 200
+      expected_body_contains:
+        - '"items"'
+
+    - id: "A4"
+      name: "必須パラメータ欠如でエラーになるか"
+      method: "POST"
+      path: "/estimate"
+      headers:
+        Content-Type: "application/json"
+      body: "{}"
+      expected_status: 400
+      expected_body_contains:
+        - '"error"'
+
+# =============================================================
+# フェーズ3: UIテスト（Playwrightで自動操作）
+# Obsidianを起動して、プラグインの画面操作を確認する
+# =============================================================
+phase_3_ui:
+  description: "実際にObsidianを起動し、プラグインの見た目と操作を目で確認するテスト群"
+  screenshot_on_fail: true   # 失敗時は必ずスクショを撮る
+  screenshot_on_pass: false  # 合格時はスクショ不要（任意で変更可）
+
+  tests:
+    - id: "U1"
+      name: "プラグインが有効になっているか"
+      action: "navigate_to_settings"
+      target: "コミュニティプラグイン → 一覧"
+      expected: "Vault Alchemistが表示されていて「有効」"
+      screenshot: true  # この項目は証拠スクショを必ず撮る
+
+    - id: "U2"
+      name: "サービスが自動起動しているか"
+      action: "navigate_to_plugin_settings"
+      target: "設定 → Vault Alchemist"
+      expected: "'Service: Running'と表示される"
+      screenshot: true
+
+    - id: "U3"
+      name: "ホームビューが開くか"
+      action: "click"
+      target: "左サイドバーの📖アイコン"
+      expected: "ホーム画面が開く"
+      screenshot: true
+
+    - id: "U4"
+      name: "チャット分割ビューが開くか"
+      action: "command_palette"
+      target: "Chat Cleaner"
+      expected: "チャット分割の画面が開く"
+      screenshot: false
+
+    - id: "U5"
+      name: "APIキーが保存されているか"
+      action: "navigate_to_plugin_settings"
+      target: "設定 → Vault Alchemist → OpenAI API Key欄"
+      expected: "APIキーの欄に入力したキーが表示される"
+      screenshot: false

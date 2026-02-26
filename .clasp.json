@@ -1,0 +1,16 @@
+{
+  "scriptId": "14uY6faGAkdAETFifO1jIOQytd5YBLdl8DCXSCnio5NSNzgfK7oI-vGbC",
+  "rootDir": ".clasp_monitor",
+  "scriptExtensions": [
+    ".js",
+    ".gs"
+  ],
+  "htmlExtensions": [
+    ".html"
+  ],
+  "jsonExtensions": [
+    ".json"
+  ],
+  "filePushOrder": [],
+  "skipSubdirectories": false
+}
